@@ -1,0 +1,111 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% ^ we require xelatex for emoji support
+
+\documentclass[9pt,mediumvopaper]{memoir}
+\setlrmarginsandblock{2cm}{2cm}{*}
+\setulmarginsandblock{2cm}{3cm}{*}
+\checkandfixthelayout
+% TODO: figure out formatting for actual printing
+\setlrmarginsandblock{2cm}{2cm}{*}
+\setulmarginsandblock{2cm}{3cm}{*}
+\checkandfixthelayout
+\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+\usepackage{microtype}
+\usepackage{palatino}
+
+% % set up font to support emojis - requires xetex
+\usepackage[T1]{fontenc}
+\usepackage[Latin,Greek,Emoticons]{ucharclasses}
+\usepackage{fontspec}
+ 
+\newfontfamily\emojifont{Noto Emoji Medium}
+% \setDefaultTransitions{\mydef}{}
+% \newfontfamily\mynormal{Noto Sans}
+% \setTransitionsForLatin{\mynormal}{}
+
+
+
+
+\author{Assembled by Ben Kettle}
+\title{THE NAOMBEN CHRONICLES}
+\date{}
+
+\newcommand{\rightmsg}[1]{
+\noindent\hfill%
+\begin{minipage}{0.8\textwidth}
+  \begin{flushright}
+    #1
+  \end{flushright}
+\end{minipage}
+\vspace{1mm}
+}
+
+\newcommand{\leftmsg}[1]{
+\noindent\begin{minipage}{0.8\textwidth}
+  #1
+\end{minipage}
+\vspace{1mm}
+}
+
+
+%%% BEGIN DOCUMENT
+
+\begin{document}
+
+\let\cleardoublepage\clearpage
+
+\maketitle
+
+
+
+
+
+
+\frontmatter
+
+\null\vfill
+
+\begin{flushleft}
+\textit{NAME OF BOOK}
+\bigskip
+
+
+
+
+
+ALL RIGHTS RESERVED OR COPYRIGHT LICENSE LANGUAGE
+
+
+
+
+\end{flushleft}
+
+\newpage
+\tableofcontents 
+
+\let\cleardoublepage\clearpage
+
+\mainmatter
+
+% template must be finished with \includes and \end{document}
+
+\leftmsg{Hey!}
+
+\rightmsg{How's it going? {\emojifont 😡😡😡😡} }
+
+{\emojifont
+😀😃😄😁😆😅😂🤣🥲🥹 ☺️😊😇🙂🙃😉😌😍🥰😘😗😙 😚😋😛😝😜🤪🤨🧐🤓😎🥸 🤩🥳😏😒😞😔😟😕🙁☹️😣 😖😫😩🥺😢😭😮‍💨 😤😠😡🤬🤯😳🥵🥶😱😨 😰😥😓🫣🤗🫡🤔🫢🤭🤫 🤥😶😶‍🌫️😐😑😬🫨🫠🙄😯😦 😧😮😲🥱😴🤤😪😵😵‍💫🫥🤐🥴🤢🤮 🤧😷🤒🤕🤑🤠😈👿👹👺🤡💩👻 💀☠️👽👾🤖🎃😺😸 😹😻😼😽🙀😿😾}
+
+\leftmsg{Oh, great! How about for you?}
+
+\rightmsg{Swell}
+
+\leftmsg{Awesome}
+
+\leftmsg{Glad to hear it.}
+
+\include{2020-07}
+
+\end{document}
