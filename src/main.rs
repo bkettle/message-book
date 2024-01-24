@@ -57,7 +57,7 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
              ORDER BY
                  m.date
              LIMIT
-                 10000;
+                 100000;
             "
         )).expect("unable to build messages query");
 

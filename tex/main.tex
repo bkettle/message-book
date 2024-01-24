@@ -25,6 +25,11 @@
 % \newfontfamily\mynormal{Noto Sans}
 % \setTransitionsForLatin{\mynormal}{}
 
+\makepagestyle{messagebookstyle}
+\makeevenhead{messagebookstyle}{\thepage}{}{\slshape\leftmark}
+\makeoddhead{messagebookstyle}{\slshape\rightmark}{}{\thepage}
+
+\pagestyle{messagebookstyle}
 
 
 

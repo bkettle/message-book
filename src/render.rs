@@ -1,4 +1,5 @@
-use imessage_database::tables::messages::{Message, BubbleType};
+use chrono::{DateTime, Local};
+use imessage_database::{tables::messages::{Message, BubbleType}, util::dates::get_offset};
 use regex::Regex;
 
 /// Make necessary replacements so that the text is ready for insertion
@@ -22,6 +23,7 @@ fn latex_escape(text: String) -> String {
         .replace("#", r"\#")
         .replace(r"{", r"\{")
         .replace(r"}", r"\}")
+        .replace("\n", "\\newline\n") // since a single newline in latex doesn't make a line break, need to add explicit newlines
         // this last one is the "variation selector" which I think determines whether an emoji
         // should be displayed big or inline. The latex font doesn't support it, so we just strip it out.
         // More info here: https://stackoverflow.com/questions/38100329/what-does-u-ufe0f-in-an-emoji-mean-is-it-the-same-if-i-delete-it
@@ -40,30 +42,41 @@ fn latex_escape(text: String) -> String {
 struct LatexMessage {
     is_from_me: bool,
     body_text: Option<String>,
-    attachment_count: i32
+    attachment_count: i32,
+    date: DateTime<Local>,
 }
 
 impl LatexMessage {
     fn render(self) -> String {
         let content = match self.body_text {
             Some(ref text) => latex_escape(text.to_string()), // probably not ideal to be cloning here
-            None => "< EMPTY MESSAGE >".to_string(),
+            None => "".to_string(),
         };
 
-        let to_write = match self.is_from_me {
+        let date_str = self.date.format("%B %e, %Y").to_string();
+
+        let mut rendered = format!("\\markright{{{}}}\n", date_str);
+
+        rendered.push_str(&match self.is_from_me {
             // god generating latex code is so annoying with the escapes
             true => format!("\\leftmsg{{{}}}\n\n", content),
             false => format!("\\rightmsg{{{}}}\n\n", content),
-        };
+        });
 
-        to_write
+        rendered
     }
 }
 
 pub fn render_message(msg: &Message) -> String {
     let parts = msg.body();
 
-    let mut latex_msg = LatexMessage { is_from_me: msg.is_from_me, body_text: None, attachment_count: 0 };
+
+    let mut latex_msg = LatexMessage { 
+        is_from_me: msg.is_from_me, 
+        body_text: None, 
+        attachment_count: 0,
+        date: msg.date(&get_offset()).expect("could not find date for message")
+    };
 
     for part in parts {
         match part {
