@@ -3,8 +3,10 @@ use std::{path::{PathBuf, Path}, fs::{File, create_dir_all}, io::{Read, Write}, 
 use clap::Parser;
 use imessage_database::{tables::{table::{get_connection, Table, DEFAULT_PATH_IOS, MESSAGE_ATTACHMENT_JOIN, MESSAGE, RECENTLY_DELETED, CHAT_MESSAGE_JOIN}, messages::Message, chat::Chat}, error::table::TableError, util::dates::get_offset};
 use anyhow::Result;
-use regex::Regex;
+use render::render_message;
 use rusqlite::types::Value;
+
+mod render;
 
 const TEMPLATE_DIR: &str = "templates";
 
@@ -22,44 +24,6 @@ struct Args {
     output_dir: PathBuf,
 }
 
-/// Make necessary replacements so that the text is ready for insertion
-/// into latex
-fn process_text(text: String) -> String {
-
-    // // need to replace backslashed before we add commands with emoji
-    // let backslash_escaped = text.replace(r"\", r"\textbackslash");
-
-    // now we need to remove emojis
-    // TODO: Somehow move this out so we only compile it once
-    // TODO: instead of just removing them, we should wrap in something that renders them right
-    // let emoji_regex: Regex = Regex::new(r"\p{Emoji}|\p{Emoji_Presentation}|\p{Emoji_Modifier}|\p{Emoji_Modifier_Base}|\p{Emoji_Component}").expect("Could not compile de-moji regex");
-    // let emoji_regex = Regex::new(r"(\p{Extended_Pictographic}+)").expect("Couldn't compile demoji regex");
-    // let demojid = emoji_regex.replace_all(&text, "{\\emojifont $1}").into_owned();
-
-    // TODO: gotta be a more efficient way to do this
-    let escaped = text 
-        .replace("’", "'")
-        .replace("“", "\"")
-        .replace("”", "\"")
-        .replace(r"\", r"\textbackslash\ ")
-        .replace("$", r"\$")
-        .replace("%", r"\%")
-        .replace("&", r"\&")
-        .replace("_", r"\_")
-        .replace("^", r"\textasciicircum\ ")
-        .replace("~", r"\textasciitilde\ ")
-        .replace("#", r"\#")
-        .replace(r"{", r"\{")
-        .replace(r"}", r"\}")
-        .replace("\u{FFFC}", "[OBJ]");
-        // .replace("\u{FFFD}", "[OBJ]");
-
-    let emoji_regex = Regex::new(r"(\p{Extended_Pictographic}+)").expect("Couldn't compile demoji regex");
-    let demojid = emoji_regex.replace_all(&escaped, "{\\emojifont $1}").into_owned();
-
-    demojid
-
-}
 
 fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf) -> Result<(), TableError> {
     let db = get_connection(db_path).unwrap();
@@ -147,21 +111,12 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
 
         msg.gen_text(&db).expect("failed to generate message");
 
-        let mut output_file = &current_output_info.as_ref().expect("Current output info was none while processing message").1;
 
         // this will need to be much more complicated eventually to handle images, reactions, ... ugh thought this project would be simple
-        let content = match msg.text {
-            Some(ref text) => process_text(text.to_string()), // probably not ideal to be cloning here
-            None => "< EMPTY MESSAGE >".to_string(),
-        };
+        let rendered = render_message(&msg);
 
-        let to_write = match msg.is_from_me {
-            // god generating latex code is so annoying with the escapes
-            true => format!("\\leftmsg{{{}}}\n\n", content),
-            false => format!("\\rightmsg{{{}}}\n\n", content),
-        };
-
-        output_file.write(to_write.as_bytes()).expect("Unable to write message to output file");
+        let mut output_file = &current_output_info.as_ref().expect("Current output info was none while processing message").1;
+        output_file.write(rendered.as_bytes()).expect("Unable to write message to output file");
 
         // println!("Added message {:?} to output file {:?}", msg, current_output_info.as_ref().map(|x| &x.0));
     }
