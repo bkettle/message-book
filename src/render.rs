@@ -48,10 +48,19 @@ struct LatexMessage {
 
 impl LatexMessage {
     fn render(self) -> String {
-        let content = match self.body_text {
+        let mut content = match self.body_text {
             Some(ref text) => latex_escape(text.to_string()), // probably not ideal to be cloning here
             None => "".to_string(),
         };
+
+        // add attachment labels
+        if self.attachment_count > 0 {
+            if content.len() > 0 {
+                // add some padding if there was text in the message with the attachment
+                content.push_str("\\enskip")
+            }
+            content.push_str(format!("\\fbox{{{} Attachment{}}}", self.attachment_count, if self.attachment_count == 1 {""} else {"s"}).as_ref());
+        }
 
         let date_str = self.date.format("%B %e, %Y").to_string();
 

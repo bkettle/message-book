@@ -1,4 +1,4 @@
-use std::{path::{PathBuf, Path}, fs::{File, create_dir_all}, io::{Read, Write}, rc::Rc};
+use std::{path::{PathBuf, Path}, fs::{File, create_dir_all, copy}, io::{Read, Write}, rc::Rc};
 
 use clap::Parser;
 use imessage_database::{tables::{table::{get_connection, Table, DEFAULT_PATH_IOS, MESSAGE_ATTACHMENT_JOIN, MESSAGE, RECENTLY_DELETED, CHAT_MESSAGE_JOIN}, messages::Message, chat::Chat}, error::table::TableError, util::dates::get_offset};
@@ -89,7 +89,7 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
         // files as necessary, should work
         let msg_date = msg.date(&get_offset()).expect("could not find date for message");
         let chapter_name = msg_date
-            .format("%Y-%m")
+            .format("ch-%Y-%m")
             .to_string();
         let out_fname = format!("{}.tex", &chapter_name);
         let create = match &current_output_info {
@@ -97,9 +97,7 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
             Some((ref name, _)) => {name != &chapter_name},
         };
         if create {
-            if current_output_info.is_some() {
-                println!("Finished chapter {}", &chapter_name);
-            }
+            println!("Starting chapter {}", &chapter_name);
             let out_path = Path::join(output_dir, &out_fname);
             let mut f = File::create(&out_path)
                 // .expect("failed to create output file")
@@ -141,6 +139,9 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
     // and finish it with \end{document}
     // TODO: we should really do this with a templating engine
     main_tex_file.write(r"\end{document}".as_bytes()).expect("unable to finish main.tex");
+
+    // finally, copy over the makefile
+    copy([TEMPLATE_DIR, "Makefile"].iter().collect::<PathBuf>(), Path::join(output_dir, "Makefile")).expect("Could not copy makefile");
 
     Ok(())
 }

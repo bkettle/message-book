@@ -2,13 +2,9 @@
 %!TEX encoding = UTF-8 Unicode
 % ^ we require xelatex for emoji support
 
-\documentclass[9pt,mediumvopaper]{memoir}
-\setlrmarginsandblock{2cm}{2cm}{*}
-\setulmarginsandblock{2cm}{3cm}{*}
-\checkandfixthelayout
-% TODO: figure out formatting for actual printing
-\setlrmarginsandblock{2cm}{2cm}{*}
-\setulmarginsandblock{2cm}{3cm}{*}
+\documentclass[9pt,postvopaper]{memoir}
+\setlrmarginsandblock{0.75in}{0.5in}{*}
+\setulmarginsandblock{0.75in}{0.75in}{*}
 \checkandfixthelayout
 \usepackage{palatino}
 \usepackage[T1]{fontenc}
@@ -25,11 +21,13 @@
 % \newfontfamily\mynormal{Noto Sans}
 % \setTransitionsForLatin{\mynormal}{}
 
+\aliaspagestyle{title}{empty}
 
 
 
-\author{Assembled by Ben Kettle}
-\title{THE NAOMBEN CHRONICLES}
+
+\author{}
+\title{iMessage Book}
 \date{}
 
 \newcommand{\rightmsg}[1]{
@@ -54,39 +52,39 @@
 
 \begin{document}
 
-\let\cleardoublepage\clearpage
-
-\maketitle
-
-
-
-
-
-
 \frontmatter
 
-\null\vfill
-
+\begin{titlingpage}
+\maketitle
+\clearpage
 \begin{flushleft}
-\textit{NAME OF BOOK}
+\null\vfill
+\textit{iMessage Book}
 \bigskip
 
 
 
 
 
-ALL RIGHTS RESERVED OR COPYRIGHT LICENSE LANGUAGE
-
-
-
-
+ALL RIGHTS RESERVED
 \end{flushleft}
+\end{titlingpage}
 
-\newpage
+\movetooddpage
+\begin{vplace}
+\begin{center}
+  \textit{Dedicated to you.}
+\end{center}
+\end{vplace}
+
+\movetooddpage
 \tableofcontents 
 
-\let\cleardoublepage\clearpage
-
+\cleartorecto
 \mainmatter
+
+\openany
+\chapterstyle{dash}
+\addtolength\afterchapskip{2cm}
 
 % template must be finished with \includes and \end{document}
