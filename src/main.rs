@@ -1,7 +1,7 @@
 use std::{path::{PathBuf, Path}, fs::{File, create_dir_all, copy}, io::{Read, Write}, rc::Rc};
 
 use clap::Parser;
-use imessage_database::{tables::{table::{get_connection, Table, DEFAULT_PATH_IOS, MESSAGE_ATTACHMENT_JOIN, MESSAGE, RECENTLY_DELETED, CHAT_MESSAGE_JOIN}, messages::Message, chat::Chat}, error::table::TableError, util::dates::get_offset};
+use imessage_database::{tables::{table::{get_connection, Table, DEFAULT_PATH_IOS, MESSAGE_ATTACHMENT_JOIN, MESSAGE, RECENTLY_DELETED, CHAT_MESSAGE_JOIN, DEFAULT_PATH_MACOS}, messages::Message, chat::Chat}, error::table::TableError, util::dates::get_offset};
 use anyhow::Result;
 use render::render_message;
 use rusqlite::types::Value;
@@ -15,13 +15,40 @@ const TEMPLATE_DIR: &str = "templates";
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    // TODO: add support for mac db
-    backup_path: PathBuf,
     /// Phone number of the conversation to export, of the form '+15555555555'
     recipient: String,
+    /// Where to find the iMessage database. If not provided, assumes it is in the default Mac location
+    #[clap(flatten)]
+    database_location: BackupPath,
     /// The directory to create the .tex files in
     #[arg(short, long, default_value = "output")]
     output_dir: PathBuf,
+}
+
+impl Args {
+    fn get_db_location(&self) -> PathBuf {
+        match &self.database_location {
+            BackupPath { ios_backup_dir: Some(ios_dir), chat_database: None } => {
+                let mut path = ios_dir.clone();
+                path.push(DEFAULT_PATH_IOS);
+                path
+            },
+            BackupPath { ios_backup_dir: None, chat_database: Some(db_path) } => db_path.to_owned(),
+            BackupPath { ios_backup_dir: None, chat_database: None } => DEFAULT_PATH_MACOS.into(),
+            _ => panic!("too many arguments for database location")
+        }
+    }
+}
+
+#[derive(Debug, clap::Args)]
+#[group(required = false, multiple = false)]
+struct BackupPath {
+    /// Path to the root of an iOS backup folder
+    #[arg(short, long)]
+    ios_backup_dir: Option<PathBuf>,
+    /// Path to the chat database directly. If neither `ios_backup_dir` or `chat_database` is provided, the location will be assumed to be the default MacOS location.
+    #[arg(short, long)]
+    chat_database: Option<PathBuf>,
 }
 
 
@@ -148,9 +175,8 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
 
 fn main() {
     let args = Args::parse();
-    let mut backup_path = args.backup_path.clone();
-    backup_path.push(DEFAULT_PATH_IOS);
-    iter_messages(&backup_path, &args.recipient, &args.output_dir).expect("failed :(");
+    let db_path = args.get_db_location();
+    iter_messages(&db_path, &args.recipient, &args.output_dir).expect("failed :(");
 
 
 

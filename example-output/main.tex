@@ -1,0 +1,92 @@
+%!TEX TS-program = xelatex
+%!TEX encoding = UTF-8 Unicode
+% ^ we require xelatex for emoji support
+
+\documentclass[9pt,postvopaper]{memoir}
+\setlrmarginsandblock{0.75in}{0.5in}{*}
+\setulmarginsandblock{0.75in}{0.75in}{*}
+\checkandfixthelayout
+\usepackage{palatino}
+\usepackage[T1]{fontenc}
+\usepackage{fontspec}
+\usepackage{microtype}
+
+% % set up font to support emojis - requires xetex
+\usepackage[T1]{fontenc}
+\usepackage[Latin,Greek,Emoticons]{ucharclasses}
+\usepackage{fontspec}
+ 
+\newfontfamily\emojifont{Noto Emoji}
+% \setDefaultTransitions{\mydef}{}
+% \newfontfamily\mynormal{Noto Sans}
+% \setTransitionsForLatin{\mynormal}{}
+
+\aliaspagestyle{title}{empty}
+
+
+
+
+\author{}
+\title{iMessage Book}
+\date{}
+
+\newcommand{\rightmsg}[1]{
+\noindent\hfill%
+\begin{minipage}{0.8\textwidth}
+  \begin{flushright}
+    #1
+  \end{flushright}
+\end{minipage}
+\vspace{1mm}
+}
+
+\newcommand{\leftmsg}[1]{
+\noindent\begin{minipage}{0.8\textwidth}
+  #1
+\end{minipage}
+\vspace{1mm}
+}
+
+
+%%% BEGIN DOCUMENT
+
+\begin{document}
+
+\frontmatter
+
+\begin{titlingpage}
+\maketitle
+\clearpage
+\begin{flushleft}
+\null\vfill
+\textit{THE NAOMBEN CHRONICLES: VOLUME I}
+\bigskip
+
+
+
+
+
+ALL RIGHTS RESERVED
+\end{flushleft}
+\end{titlingpage}
+
+\movetooddpage
+\begin{vplace}
+\begin{center}
+  \textit{Dedicated to you.}
+\end{center}
+\end{vplace}
+
+\movetooddpage
+\tableofcontents 
+
+\cleartorecto
+\mainmatter
+
+\openany
+\chapterstyle{dash}
+\addtolength\afterchapskip{2cm}
+
+% template must be finished with \includes and \end{document}
+\include{ch-2023-10}
+\end{document}

@@ -1,1 +1,0 @@
-The iMessage-database crate seems not really set up for use outside of imessage-extractor. But I think it's better than nothing.
