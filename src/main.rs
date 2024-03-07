@@ -134,18 +134,18 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
             chapters.push(chapter_name);
         }
 
-        msg.gen_text(&db).expect("failed to generate message");
-
-
-        // this will need to be much more complicated eventually to handle images, reactions, ... ugh thought this project would be simple
-        let rendered = render_message(&msg);
-
-        let mut output_file = &current_output_info.as_ref().expect("Current output info was none while processing message").1;
-        output_file.write(rendered.as_bytes()).expect("Unable to write message to output file");
-
-        // println!("Added message {:?} to output file {:?}", msg, current_output_info.as_ref().map(|x| &x.0));
+        match msg.gen_text(&db) {
+            Ok(_) => {
+                // Successfully generated message, proceed with rendering and writing to output file
+                let rendered = render_message(&msg);
+                let mut output_file = &current_output_info.as_ref().expect("Current output info was none while processing message").1;
+                output_file.write(rendered.as_bytes()).expect("Unable to write message to output file");
+            }
+            Err(err) => {
+                // Handle the error gracefully, you can log it or ignore it depending on your requirements
+                eprintln!("Failed to generate message: {:?}", err);
+            }
     }
-
 
     // Once we create all the chapter files, we need to create the main.tex file to include them 
     let mut main_template_file = File::open([TEMPLATE_DIR, "main.tex.template"].iter().collect::<PathBuf>()).expect("Could not open template file");
