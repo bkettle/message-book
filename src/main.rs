@@ -145,6 +145,7 @@ fn iter_messages(db_path: &PathBuf, chat_identifier: &str, output_dir: &PathBuf)
                 // Handle the error gracefully, you can log it or ignore it depending on your requirements
                 eprintln!("Failed to generate message: {:?}", err);
             }
+        }
     }
 
     // Once we create all the chapter files, we need to create the main.tex file to include them 
